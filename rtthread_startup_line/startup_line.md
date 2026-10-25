@@ -269,3 +269,6 @@ void main_thread_entry(void *parameter)
 
 ### drawio 分析图:
 ![alt text](image-5.png)
+
+### RAM 数轴:
+![alt text](image-1.png)
