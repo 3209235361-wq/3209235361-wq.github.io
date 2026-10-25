@@ -55,9 +55,9 @@ LoopFillZerobss:
 ```
 </details>
 
-③ 时钟/系统初始化
+③ 时钟/系统初始化(时钟配置在Step2：rt_hw_board_init()中)
 ### 说明：时钟/系统初始化是系统启动时，必须进行的操作。
-### 这一步进行了时钟的配置，以及设置了SCB->VTOR（中断向量表地址）,存放在flash起始地址，里边存放的是中断函数的地址（像Reset Handler，NMI Handler，Hard Fault Handler等）。
+### 这一步把RCC时钟设置为复位默认状态（HSI 8MHz），以及设置了SCB->VTOR（中断向量表地址）,存放在flash起始地址，里边存放的是中断函数的地址（像Reset Handler，NMI Handler，Hard Fault Handler等）。
 <details>
 <summary>源码：时钟/系统初始化</summary>
 
@@ -152,7 +152,8 @@ int entry(void)
 </details>
 
 ### 中断函数弱定义 ###
-### 说明：链接期不执行。当用户程序中没有定义中断函数时，会使用默认的中断函数（开了中断，没写中断函数，会跑HardFault_Handler,循环卡死）。
+### 说明：.weak 只是链接期的弱符号:别处有强定义就用强的,没有就把该向量绑到
+### Default_Handler;运行期一旦该中断触发、又没有自己写处理函数,就落进 Default_Handler 死循环。
 <details>
 <summary>源码：中断函数弱定义</summary>
 
@@ -181,12 +182,12 @@ int entry(void)
 ```c
 int rtthread_startup(void)
 {
-    rt_hw_interrupt_disable();
+    rt_hw_interrupt_disable();//关闭中断，防止在初始化过程中被中断打断
 
     /* board level initialization
      * NOTE: please initialize heap inside board initialization.
      */
-    rt_hw_board_init();
+    rt_hw_board_init();//72MHz时钟在此处配置
 
     /* show RT-Thread version */
     rt_show_version();
@@ -239,7 +240,7 @@ int rtthread_startup(void)
 ### Step3 ###
 跑 main 线程
 ### 说明：scheduler 启动后，开始跑 main 线程（不是第一个跑，第一个跑timer线程）
-### 
+### 优先级 timer(4) > main(10)
 <details>
 <summary>源码：main 线程</summary>
 
