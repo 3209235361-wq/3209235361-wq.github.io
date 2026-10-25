@@ -13,6 +13,8 @@
 ### 说明：Flash掉电不丢失，SRAM掉电丢失。每次上电时，都需要将Flash中的数据复制到SRAM中，才能正常运行。(.data：存放有初始值的全局，静态变量)
 <details>
 <summary>源码：flash → sram</summary>
+
+``` assembly
 /* Copy the data segment initializers from flash to SRAM */
   movs r1, #0
   b LoopCopyDataInit
@@ -31,6 +33,7 @@ LoopCopyDataInit:
   bcc CopyDataInit
   ldr r2, =_sbss
   b LoopFillZerobss
+```
 </details>
 
 ② 清零 .bss
@@ -38,6 +41,8 @@ LoopCopyDataInit:
 ### 每次上电时，都需要将.bss中的数据清零，所以说未初始化的变量默认值为0。
 <details>
 <summary>源码：bss清零</summary>
+
+``` assembly
 /* Zero fill the bss segment. */
 FillZerobss:
   movs r3, #0
@@ -47,6 +52,7 @@ LoopFillZerobss:
   ldr r3, = _ebss
   cmp r2, r3
   bcc FillZerobss
+```
 </details>
 
 ③ 时钟/系统初始化
@@ -54,8 +60,11 @@ LoopFillZerobss:
 ### 这一步进行了时钟的配置，以及设置了SCB->VTOR（中断向量表地址）,存放在flash起始地址，里边存放的是中断函数的地址（像Reset Handler，NMI Handler，Hard Fault Handler等）。
 <details>
 <summary>源码：时钟/系统初始化</summary>
+
+``` assembly
 /* Call the clock system intitialization function.*/
     bl  SystemInit
+```
 
 ---->跳转到SystemInit函数
 
@@ -124,10 +133,15 @@ void SystemInit (void)
 <details>
 
 <summary>源码：跳转到 entry</summary>
+
+  ``` assembly
 /* Call the application's entry point.*/
   bl  entry
 
   ---->跳转到entry函数
+
+  ```
+
   ```c
 int entry(void)
 {
@@ -141,6 +155,8 @@ int entry(void)
 ### 说明：链接期不执行。当用户程序中没有定义中断函数时，会使用默认的中断函数（开了中断，没写中断函数，会跑HardFault_Handler,循环卡死）。
 <details>
 <summary>源码：中断函数弱定义</summary>
+
+``` assembly
   .weak NMI_Handler
   .thumb_set NMI_Handler,Default_Handler
 
@@ -148,6 +164,7 @@ int entry(void)
   .thumb_set HardFault_Handler,Default_Handler
   ........
   ........
+```
 </details>
 
 ### drawio 分析图:
@@ -207,11 +224,13 @@ int rtthread_startup(void)
 ```
 </details>
 
-### drawio 分析图:
+### drawio 分析图1:
 ![alt text](image.png)
 
-
-![alt text](image-2.png) ![alt text](image-1.png) ![alt text](image-3.png)
+### drawio 分析图2:
+![alt text](image-2.png) 
+![alt text](image-1.png) 
+![alt text](image-3.png)
 
 ### Step3 ###
 跑 main 线程
