@@ -228,10 +228,12 @@ int rtthread_startup(void)
 ![alt text](image.png)
 
 ### drawio 分析图2:
-![alt text](image-1.png) 
+![alt text](image-6.png) 
 
 ### drawio 分析图3:
 ![alt text](image-2.png) 
+
+### drawio 分析图4:
 ![alt text](image-3.png)
 
 ### Step3 ###
