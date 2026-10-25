@@ -1,3 +1,7 @@
+---
+title: 从 Reset_Handler 到 main：RT-Thread 在 STM32F103 上是怎么启动的
+---
+
 # 从 Reset_Handler 到 main：RT-Thread 在 STM32F103 上是怎么启动的
 
 > 环境：STM32F103C8T6 + RT-Thread 4.0.3 + RT-Thread Studio 2.3.1（GCC）
