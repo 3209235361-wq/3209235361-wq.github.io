@@ -10,6 +10,7 @@
 | --- | --- | --- |
 | [RT-Thread 启动流程：从 Reset_Handler 到 main](rtthread_startup_line/startup_line_new.md) | 汇编阶段搬 `.data`/清 `.bss`、`SystemInit` 到底做了什么、`entry → rtthread_startup`、调度器启动后谁先跑 | STM32F103C8T6 + RT-Thread 4.0.3 + RT-Thread Studio 2.3.1 (GCC) |
 | [内核对象分布：RT-Thread 怎么用一个数组管住所有内核对象](rtthread_kernel_obj_distribution/kernel_obj.md) | 对象容器数组、`rt_object` 内嵌链表、两种 type 枚举的区别、`rt_container_of` 怎么反推宿主结构 | RT-Thread 4.0.3 |
+| [内存管理：RT-Thread 怎么用一条链表管住整个堆](rtthread_mem_manage/mem_manage.md) | `heap_mem` 块头、`next`/`prev` 是偏移不是指针、`lfree` 与两种分配策略、`plug_holes` 前后合并 | STM32F103C8T6 + RT-Thread 4.0.3 |
 
 ## 写作方式
 
@@ -24,8 +25,11 @@
 .
 ├── index.md                              站点首页（文章入口）
 ├── rtthread_startup_line/                启动流程一文 + 配图
-└── rtthread_kernel_obj_distribution/     内核对象分布一文 + 配图
+├── rtthread_kernel_obj_distribution/     内核对象分布一文 + 配图
+└── rtthread_mem_manage/                  内存管理一文 + 配图
 ```
+
+每篇另附一份 `xxx_纯文字版.md`（去掉图片与折叠块），用于在论坛发帖。
 
 ## 许可
 
