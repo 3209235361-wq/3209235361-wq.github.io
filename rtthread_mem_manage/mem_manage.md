@@ -5,7 +5,7 @@ title: 内存管理：RT-Thread 怎么用一条链表管住整个堆
 # 内存管理：RT-Thread 怎么用一条链表管住整个堆
 
 > 环境：STM32F103C8T6（20KB SRAM）+ RT-Thread 4.0.3
-> 源码：`rt-thread/src/mem.c`（`RT_USING_SMALL_MEM` 这一套），堆的交给它在 `drivers/board.c`
+> 源码：`rt-thread/src/mem.c`（`RT_USING_SMALL_MEM` 这一套），堆的初始化在 `drivers/board.c`
 > 文中代码取自本工程实际使用的内核源码，不是照抄手册。
 
 ## 目录
@@ -475,6 +475,8 @@ if (mem < lfree)
 used_mem -= (mem->next - ((rt_uint8_t *)mem - heap_ptr));   /* 减掉整块：块头 + 数据 */
 ```
 
+（`used_mem` 这一行在源码里被 `#ifdef RT_USING_MEM_STATS` 包着，没开统计宏时不会编译进去；它的作用只是维护 `free` 命令显示的数字，不影响链表本身。）
+
 `lfree` 在 `rt_malloc` 里只会往前推，在这里可能往回退——两边合起来才保证"`lfree` 永远指向最低的空闲块"。
 
 <a id="step4-3"></a>
@@ -576,7 +578,7 @@ if (mem != nmem && nmem->used == 0 && (rt_uint8_t *)nmem != (rt_uint8_t *)heap_e
 
 | 条件 | 防的是 |
 |---|---|
-| `mem != nmem` | 这已经是最后一个块（`next` 指回自己） |
+| `mem != nmem` | 防御性判断：正常堆里不会触发（只有哨兵的 `next` 才指回自己，而 `mem` 不可能是哨兵） |
 | `nmem->used == 0` | 下一块正在使用，不能并 |
 | `nmem != heap_end` | 下一块是哨兵，哨兵不可并、也不能改 |
 
@@ -620,7 +622,7 @@ if (pmem != mem && pmem->used == 0)
 代码是**先 forward 再 backward**，顺序不能换着理解：先往高地址吞一个，再被低地址吞掉。三块连着空闲时：
 
 ```
-释放前：  [A 头][空闲][B 头][空闲][C 头][数据] … [哨兵]
+释放前：  [A 头][空闲][B 头][空闲][C 头][空闲] … [哨兵]
 
 free(B)，forward：B 吞掉 C
           [A 头][空闲][B 头][     空闲      ][哨兵]
